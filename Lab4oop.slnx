@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Lab4oop/Lab4oop.vcxproj" Id="6d90d524-e47a-4de2-8902-e737e352702f" />
+</Solution>
