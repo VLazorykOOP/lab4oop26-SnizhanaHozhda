@@ -540,4 +540,177 @@ void runTask3()
 
     // ---------- OBJECT COUNT ----------
     cout << "\nMatrix objects count: " << MatrixShort::getCount() << endl;
+}#include "Tasks.h"
+#include <iostream>
+using namespace std;
+
+// ===================== VECTORSHORT =====================
+class VectorShort {
+protected:
+    short* data;
+    int size;
+    int codeError;
+public:
+    VectorShort(int s = 0, short init = 0) : size(s), codeError(0) {
+        if (s > 0) {
+            data = new (nothrow) short[s];
+            if (!data) { codeError = 1; size = 0; return; }
+            for (int i = 0; i < s; i++) data[i] = init;
+        }
+        else data = nullptr;
+    }
+
+    VectorShort(const VectorShort& v) {
+        size = v.size;
+        codeError = v.codeError;
+        if (size > 0) {
+            data = new short[size];
+            for (int i = 0; i < size; i++) data[i] = v.data[i];
+        }
+        else data = nullptr;
+    }
+
+    ~VectorShort() { delete[] data; }
+
+    int getSize() const { return size; }
+    int getCodeError() const { return codeError; }
+
+    short& operator[](int i) {
+        if (i < 0 || i >= size) { codeError = 2; return data[size - 1]; }
+        return data[i];
+    }
+};
+
+// ===================== MATRIXSHORT =====================
+class MatrixShort {
+protected:
+    VectorShort* ShortArray;
+    int n, size;
+    int codeError;
+    static int num_matrix;
+
+    bool sameSize(const MatrixShort& m) const {
+        return n == m.n && size == m.size;
+    }
+
+    void setError(int c) const { const_cast<MatrixShort*>(this)->codeError = c; }
+
+public:
+    MatrixShort() : ShortArray(nullptr), n(0), size(0), codeError(0) { num_matrix++; }
+
+    MatrixShort(int r, int c) : n(r), size(c), codeError(0) {
+        ShortArray = new VectorShort[n];
+        for (int i = 0; i < n; i++) ShortArray[i] = VectorShort(size, 0);
+        num_matrix++;
+    }
+
+    MatrixShort(int r, int c, short v) : n(r), size(c), codeError(0) {
+        ShortArray = new VectorShort[n];
+        for (int i = 0; i < n; i++) ShortArray[i] = VectorShort(size, v);
+        num_matrix++;
+    }
+
+    MatrixShort(const MatrixShort& m) : n(m.n), size(m.size), codeError(m.codeError) {
+        ShortArray = new VectorShort[n];
+        for (int i = 0; i < n; i++) ShortArray[i] = m.ShortArray[i];
+        num_matrix++;
+    }
+
+    ~MatrixShort() { delete[] ShortArray; num_matrix--; }
+
+    // ================= ERROR =================
+    void printError() const {
+        if (codeError == 0) cout << "No error\n";
+        else cout << "Error code: " << codeError << endl;
+    }
+
+    // ================= INPUT FRIENDLY =================
+    friend istream& operator>>(istream& is, MatrixShort& m) {
+        cout << "Enter elements (row by row):\n";
+        for (int i = 0; i < m.n; i++) {
+            for (int j = 0; j < m.size; j++) {
+                cout << "A[" << i << "][" << j << "] = ";
+                is >> m.ShortArray[i][j];
+            }
+        }
+        return is;
+    }
+
+    friend ostream& operator<<(ostream& os, const MatrixShort& m) {
+        for (int i = 0; i < m.n; i++) {
+            for (int j = 0; j < m.size; j++) os << m.ShortArray[i][j] << " ";
+            os << endl;
+        }
+        return os;
+    }
+
+    static int getCount() { return num_matrix; }
+
+    // ================= ADD/SUB =================
+    MatrixShort operator+(const MatrixShort& m) {
+        if (!sameSize(m)) { setError(11); return MatrixShort(); }
+        MatrixShort r(n, size);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < size; j++)
+                r.ShortArray[i][j] = ShortArray[i][j] + m.ShortArray[i][j];
+        return r;
+    }
+
+    MatrixShort operator-(const MatrixShort& m) {
+        if (!sameSize(m)) { setError(12); return MatrixShort(); }
+        MatrixShort r(n, size);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < size; j++)
+                r.ShortArray[i][j] = ShortArray[i][j] - m.ShortArray[i][j];
+        return r;
+    }
+
+    // ================= MATRIX MULTIPLICATION =================
+    MatrixShort operator*(const MatrixShort& m) {
+        if (size != m.n) { setError(10); return MatrixShort(); }
+        MatrixShort r(n, m.size, 0);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m.size; j++)
+                for (int k = 0; k < size; k++)
+                    r.ShortArray[i][j] += ShortArray[i][k] * m.ShortArray[k][j];
+        return r;
+    }
+};
+
+int MatrixShort::num_matrix = 0;
+
+// ================= RUN MENU =================
+void runTask3() {
+    int n, m;
+    cout << "Enter rows and cols: "; cin >> n >> m;
+
+    MatrixShort A(n, m), B(n, m);
+
+    cin >> A;
+    cin >> B;
+
+    int ch;
+    do {
+        cout << "\n===== MENU =====\n";
+        cout << "1 A+B\n2 A-B\n3 A*B\n4 Show errors\n5 Count objects\n0 Exit\nChoice: ";
+        cin >> ch;
+
+        MatrixShort R;
+
+        switch (ch) {
+        case 1: R = A + B; cout << R; break;
+        case 2: R = A - B; cout << R; break;
+        case 3: R = A * B; cout << R; break;
+        case 4:
+            cout << "A: "; A.printError();
+            cout << "B: "; B.printError();
+            break;
+        case 5:
+            cout << MatrixShort::getCount() << endl;
+            break;
+        }
+
+    } while (ch != 0);
 }
+
+// NOTE: STL version (vector<vector<short>>) can be provided if needed.
