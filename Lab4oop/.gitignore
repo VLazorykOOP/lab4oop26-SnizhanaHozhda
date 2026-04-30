@@ -1,0 +1,16 @@
+# Сміття компіляції
+x64/
+Debug/
+Release/
+*.log
+*.tlog
+*.lastbuildstate
+*.obj
+*.exe
+*.ilk
+*.pdb
+
+# Файли Visual Studio
+.vs/
+*.user
+*.suo
