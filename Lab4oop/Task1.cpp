@@ -63,7 +63,7 @@ public:
         count++;
     }
 
-    // 2. Оператор присвоювання (Copy Assignment Operator)
+
     Vector3F& operator=(const Vector3F& v) {
         if (this != &v) {
             for (int i = 0; i < 3; i++)
@@ -326,7 +326,7 @@ void runTask1()
     cin >> b;
 
 
-    // випадковий вектор
+ 
     float arr[3];
 
     for (int i = 0; i < 3; i++)
@@ -337,7 +337,7 @@ void runTask1()
     cout << "Random vector r: " << r << endl;
 
 
-    // складний вираз (5+ операцій)
+
     Vector3F c = a + b - r * 2 + (b % 2);
 
 
@@ -345,7 +345,7 @@ void runTask1()
     cout << c << endl;
 
 
-    // перевірка операторів
+
     cout << "a[1] = " << a[1] << endl;
 
     cout << "Sum a() = " << a() << endl;
@@ -363,7 +363,6 @@ void runTask1()
         cout << "a <= b\n";
 
 
-    // інкременти
     ++a;
     cout << "After ++a: " << a << endl;
 
@@ -371,7 +370,7 @@ void runTask1()
     cout << "After b++: " << b << endl;
 
 
-    // векторний добуток
+
     Vector3F t = a;
     t &= b;
 

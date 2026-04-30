@@ -128,8 +128,8 @@ public:
     void inputRandom(int n)
     {
         string surnames[] = { "Ivanenko", "Petrenko", "Shevchenko" };
-        string names[] = { "Ivan", "Petro", "Oleg" };
-        string patronymics[] = { "Ivanovich", "Petrovich", "Olegovich" };
+        string names[] = { "Ivan", "Olena", "Yulia" };
+        string patronymics[] = { "Ivanovich", "Petrivna", "Olegovna" };
 
         for (int i = 0; i < n; i++)
         {
@@ -181,8 +181,7 @@ void runTask2()
 
     cin >> mode;
 
-
-    // ---------- INPUT ----------
+\
     if (mode == 1)
     {
         pb.inputKeyboard();
@@ -209,19 +208,18 @@ void runTask2()
     }
 
 
-    // ---------- OUTPUT ----------
     cout << "\nPhoneBook:\n";
     cout << pb;
 
 
-    // ---------- SEARCH ----------
+ 
     string phone;
 
     cout << "\nEnter phone for search: ";
     cin >> phone;
 
 
-    // operator []
+   
     Person p1 = pb[phone];
 
     if (pb.CodeError == 0)
@@ -234,7 +232,6 @@ void runTask2()
     }
 
 
-    // operator ()
     Person p2 = pb(phone);
 
     if (pb.CodeError == 0)

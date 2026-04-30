@@ -1,543 +1,268 @@
-#include <iostream>
 #include "Tasks.h"
+#include <iostream>
+#include <new> 
+
 using namespace std;
 
-
-// ================= VectorShort =================
-class VectorShort
-{
-private:
+class VectorShort {
     short* data;
     int size;
-
+    int codeError;
 public:
 
-    VectorShort()
-    {
-        size = 0;
-        data = nullptr;
+    friend class MatrixShort;
+
+    VectorShort(int s = 0, short init = 0) : size(s), codeError(0) {
+        data = (s > 0) ? new (nothrow) short[s] : nullptr;
+        if (s > 0 && !data) { codeError = 1; size = 0; }
+        else if (data) { for (int i = 0; i < s; i++) data[i] = init; }
     }
 
-    VectorShort(int n)
-    {
-        size = n;
-        data = new short[n] {0};
+    VectorShort(const VectorShort& v) : size(v.size), codeError(v.codeError) {
+        data = (size > 0) ? new (nothrow) short[size] : nullptr;
+        if (data) for (int i = 0; i < size; i++) data[i] = v.data[i];
     }
 
-    VectorShort(const VectorShort& v)
-    {
-        size = v.size;
-        data = new short[size];
-
-        for (int i = 0; i < size; i++)
-            data[i] = v.data[i];
+    VectorShort& operator=(const VectorShort& v) {
+        if (this != &v) {
+            delete[] data;
+            size = v.size;
+            codeError = v.codeError;
+            data = (size > 0) ? new (nothrow) short[size] : nullptr;
+            if (data) for (int i = 0; i < size; i++) data[i] = v.data[i];
+        }
+        return *this;
     }
 
-    ~VectorShort()
-    {
-        delete[] data;
-    }
-
-    int getSize() const { return size; }
-
-    short& operator[](int i)
-    {
-        return data[i];
-    }
-
-    friend istream& operator>>(istream& in, VectorShort& v)
-    {
-        for (int i = 0; i < v.size; i++)
-            in >> v.data[i];
-        return in;
-    }
-
-    friend ostream& operator<<(ostream& out, const VectorShort& v)
-    {
-        for (int i = 0; i < v.size; i++)
-            out << v.data[i] << " ";
-        return out;
-    }
+    ~VectorShort() { delete[] data; }
+    short& operator[](int i) { return data[i]; }
 };
 
-
-
-// ================= MatrixShort =================
-class MatrixShort
-{
-protected:
-
+class MatrixShort {
     VectorShort* ShortArray;
     int n, size;
     int codeError;
-
     static int num_matrix;
-
 public:
+    MatrixShort() : ShortArray(nullptr), n(0), size(0), codeError(0) {
+        num_matrix++; }
 
-    // ---------- constructors ----------
-    MatrixShort()
-    {
-        ShortArray = nullptr;
-        n = size = codeError = 0;
+    MatrixShort(int r, int c) : n(r), size(c), codeError(0) {
+        ShortArray = (n > 0) ? new VectorShort[n] : nullptr;
+        for (int i = 0; i < n; i++) ShortArray[i] = VectorShort(size, 0);
         num_matrix++;
     }
 
-    MatrixShort(int s)
-    {
-        n = size = s;
-        ShortArray = new VectorShort[n];
+    MatrixShort(const MatrixShort& m) : n(m.n), size(m.size), codeError(m.codeError) {
+        ShortArray = (n > 0) ? new VectorShort[n] : nullptr;
+        for (int i = 0; i < n; i++) ShortArray[i] = m.ShortArray[i];
+        num_matrix++;
+    }
 
-        for (int i = 0; i < n; i++)
-        {
-            ShortArray[i] = VectorShort(size);
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] = (i == j);
+   
+
+    MatrixShort& operator=(const MatrixShort& m) {
+        if (this != &m) {
+            delete[] ShortArray;
+            n = m.n; size = m.size;
+            ShortArray = (n > 0) ? new VectorShort[n] : nullptr;
+            for (int i = 0; i < n; i++) ShortArray[i] = m.ShortArray[i];
         }
-
-        num_matrix++;
+        return *this;
     }
 
-    MatrixShort(int n_, int s_)
-    {
-        n = n_;
-        size = s_;
-        ShortArray = new VectorShort[n];
-
-        for (int i = 0; i < n; i++)
-            ShortArray[i] = VectorShort(size);
-
-        num_matrix++;
-    }
-
-    MatrixShort(int n_, int s_, short val)
-    {
-        n = n_;
-        size = s_;
-        ShortArray = new VectorShort[n];
-
-        for (int i = 0; i < n; i++)
-        {
-            ShortArray[i] = VectorShort(size);
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] = val;
+    void printError() const {
+        if (codeError == 0) {
+            cout << "No error" << endl;
         }
-
-        num_matrix++;
-    }
-
-    MatrixShort(const MatrixShort& m)
-    {
-        n = m.n;
-        size = m.size;
-        ShortArray = new VectorShort[n];
-
-        for (int i = 0; i < n; i++)
-        {
-            ShortArray[i] = VectorShort(size);
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] = m.ShortArray[i][j];
+        else {
+            cout << "Error code: " << codeError << endl;
         }
-
-        num_matrix++;
     }
 
-    ~MatrixShort()
-    {
-        delete[] ShortArray;
-        num_matrix--;
-    }
-
-    // ---------- info ----------
     int getN() const { return n; }
     int getSize() const { return size; }
-    int getError() const { return codeError; }
+    int getCodeError() const { return codeError; }
 
-    static int getCount() { return num_matrix; }
+    ~MatrixShort() { delete[] ShortArray; num_matrix--; }
 
-
-    // ---------- indexing ----------
-    VectorShort& operator[](int i)
-    {
-        if (i >= 0 && i < n)
-            return ShortArray[i];
-
-        codeError = 1;
-        return ShortArray[n - 1];
+    friend istream& operator>>(istream& is, MatrixShort& m) {
+        cout << "Input elements of matrix\n";
+        for (int i = 0; i < m.n; i++)
+            for (int j = 0; j < m.size; j++) {
+                cout << "A[" << i << "][" << j << "] = ";
+                is >> m.ShortArray[i][j];
+            }
+        return is;
     }
 
+    friend ostream& operator<<(ostream& os, const MatrixShort& m) {
+        for (int i = 0; i < m.n; i++) {
+            for (int j = 0; j < m.size; j++) os << m.ShortArray[i][j] << " ";
+            os << endl;
+        }
+        return os;
+    }
 
-    // ---------- unary ----------
-    MatrixShort& operator++()
-    {
+    MatrixShort operator+(const MatrixShort& m) {
+        MatrixShort res(n, size);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < size; j++) res.ShortArray[i][j] = ShortArray[i][j] + m.ShortArray[i][j];
+        return res;
+    }
+
+   
+    MatrixShort operator-(const MatrixShort& m) {
+        MatrixShort res(n, size);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < size; j++)
+                res.ShortArray[i][j] = ShortArray[i][j] - m.ShortArray[i][j];
+        return res;
+    }
+
+   
+    MatrixShort operator*(const MatrixShort& m) {
+        MatrixShort res(n, m.size);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m.size; j++) {
+                res.ShortArray[i][j] = 0;
+                for (int k = 0; k < size; k++)
+                    res.ShortArray[i][j] += ShortArray[i][k] * m.ShortArray[k][j];
+            }
+        return res;
+    }
+
+   
+    MatrixShort& operator++() {
         for (int i = 0; i < n; i++)
             for (int j = 0; j < size; j++)
                 ShortArray[i][j]++;
         return *this;
     }
 
-    MatrixShort operator++(int)
-    {
-        MatrixShort tmp = *this;
-        ++(*this);
-        return tmp;
+    MatrixShort operator++(int) {
+        MatrixShort temp(*this); 
+        operator++();            
+        return temp;             
     }
 
-    MatrixShort& operator--()
-    {
+    MatrixShort& operator--() {
         for (int i = 0; i < n; i++)
             for (int j = 0; j < size; j++)
                 ShortArray[i][j]--;
         return *this;
     }
 
-    bool operator!()
-    {
+
+    MatrixShort operator--(int) {
+        MatrixShort temp(*this);
+        operator--();
+        return temp;
+    }
+
+
+    bool operator!() const {
         return (n != 0 && size != 0);
     }
 
-    MatrixShort operator~()
-    {
-        MatrixShort r(n, size);
 
+    MatrixShort operator-() const {
+        MatrixShort res(n, size);
         for (int i = 0; i < n; i++)
             for (int j = 0; j < size; j++)
-                r[i][j] = ~ShortArray[i][j];
-
-        return r;
+                res.ShortArray[i].data[j] = -this->ShortArray[i].data[j];
+        return res;
     }
 
-    MatrixShort operator-()
-    {
-        MatrixShort r(n, size);
 
+    MatrixShort operator~() const {
+        MatrixShort res(n, size);
         for (int i = 0; i < n; i++)
             for (int j = 0; j < size; j++)
-                r[i][j] = -ShortArray[i][j];
-
-        return r;
+                res.ShortArray[i].data[j] = ~this->ShortArray[i].data[j];
+        return res;
     }
 
-
-    // ---------- assignment ----------
-    MatrixShort& operator=(const MatrixShort& m)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] = m.ShortArray[i][j];
-
-        return *this;
-    }
-
-
-    // ---------- arithmetic ----------
-    MatrixShort operator+(const MatrixShort& m)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] + m.ShortArray[i][j];
-
-        return r;
-    }
-
-    MatrixShort operator-(const MatrixShort& m)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] - m.ShortArray[i][j];
-
-        return r;
-    }
-
-    MatrixShort operator*(const MatrixShort& m)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] * m.ShortArray[i][j];
-
-        return r;
-    }
-
-    MatrixShort operator*(short a)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] * a;
-
-        return r;
-    }
-
-    MatrixShort operator/(short a)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] / a;
-
-        return r;
-    }
-
-    MatrixShort operator%(short a)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] % a;
-
-        return r;
-    }
-
-
-    // ---------- compound ----------
-    MatrixShort& operator+=(const MatrixShort& m)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] += m.ShortArray[i][j];
-
-        return *this;
-    }
-
-    MatrixShort& operator-=(const MatrixShort& m)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] -= m.ShortArray[i][j];
-
-        return *this;
-    }
-
-    MatrixShort& operator*=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] *= a;
-
-        return *this;
-    }
-
-    MatrixShort& operator/=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] /= a;
-
-        return *this;
-    }
-
-    MatrixShort& operator%=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] %= a;
-
-        return *this;
-    }
-
-
-    // ---------- bitwise ----------
-    MatrixShort operator|(short a)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] | a;
-
-        return r;
-    }
-
-    MatrixShort operator^(short a)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] ^ a;
-
-        return r;
-    }
-
-    MatrixShort operator&(short a)
-    {
-        MatrixShort r(n, size);
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                r[i][j] = ShortArray[i][j] & a;
-
-        return r;
-    }
-
-    MatrixShort& operator<<=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] <<= a;
-
-        return *this;
-    }
-
-    MatrixShort& operator>>=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] >>= a;
-
-        return *this;
-    }
-
-    MatrixShort& operator|=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] |= a;
-
-        return *this;
-    }
-
-    MatrixShort& operator^=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] ^= a;
-
-        return *this;
-    }
-
-    MatrixShort& operator&=(short a)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                ShortArray[i][j] &= a;
-
-        return *this;
-    }
-
-
-    // ---------- compare ----------
-    int sum() const
-    {
-        int s = 0;
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < size; j++)
-                s += ShortArray[i][j];
-        return s;
-    }
-
-    bool operator==(const MatrixShort& m) { return sum() == m.sum(); }
-    bool operator!=(const MatrixShort& m) { return sum() != m.sum(); }
-    bool operator>(const MatrixShort& m) { return sum() > m.sum(); }
-    bool operator<(const MatrixShort& m) { return sum() < m.sum(); }
-    bool operator>=(const MatrixShort& m) { return sum() >= m.sum(); }
-    bool operator<=(const MatrixShort& m) { return sum() <= m.sum(); }
-
-
-    // ---------- IO ----------
-    friend istream& operator>>(istream& in, MatrixShort& m)
-    {
-        for (int i = 0; i < m.n; i++)
-            in >> m.ShortArray[i];
-        return in;
-    }
-
-    friend ostream& operator<<(ostream& out, const MatrixShort& m)
-    {
-        for (int i = 0; i < m.n; i++)
-            out << m.ShortArray[i] << endl;
-        return out;
-    }
+    static int getCount() { return num_matrix; }
 };
 
 int MatrixShort::num_matrix = 0;
 
-void runTask3()
-{
-    MatrixShort A(2, 2);
-    MatrixShort B(2, 2);
-    MatrixShort C(2, 2);
+void runTask3() {
+    int n, m;
+    cout << "Enter the number of rows and columns for the matrices: ";
+    cin >> n >> m;
+
+    MatrixShort A(n, m), B(n, m);
+    cout << "Enter matrix A:" << endl; cin >> A;
+    cout << "Enter matrix B:" << endl; cin >> B;
+
+    int ch;
+    do {
+        cout << "\n===== MENU =====\n"
+            << "1. A + B\n2. A - B\n3. A * B\n4. Show errors\n"
+            << "5. Object count\n6. Increment ++A\n7. Decrement --A\n"
+            << "8. Check if not empty\n";
+        cout << "9. Unary minus (-A)\n10. Bitwise NOT (~A)\n";
+
+        cin >> ch;
+
+        MatrixShort R; 
+        switch (ch) {
+        case 1:
+            R = A + B;
+            cout << "Result:\n" << R << endl;
+            break;
+        case 2:
+            R = A - B;
+            cout << "Result:\n" << R << endl;
+            break;
+        case 3:
+            if (n == m) { 
+                R = A * B;
+                cout << "Result:\n" << R << endl;
+            }
+            else {
+                cout << "Dimension error for multiplication!" << endl;
+            }
+            break;
+        case 4:
+            cout << "Errors in A: "; A.printError();
+            cout << "Errors in B: "; B.printError();
+            break;
+        case 5:
+            cout << "Count: " << MatrixShort::getCount() << endl;
+            break;
+        case 6:
+            ++A;
+            cout << "Matrix A incremented (prefix):\n" << A << endl;
+            break;
+        case 7:
+            A--;
+            cout << "Matrix A decremented (postfix):\n" << A << endl;
+            break;
+        case 8:
+            if (!A) {
+                cout << "Matrix A is not empty." << endl;
+            }
+            else {
+                cout << "Matrix A is empty (zero dimensions)." << endl;
+            }
+            break;
+        case 9:
+            cout << "Result (-A):\n" << -A << endl;
+            break;
+        case 10:
+            cout << "Result (~A):\n" << ~A << endl;
+            break;
+        case 0:
+            cout << "Exiting..." << endl;
+            break;
+        default:
+            cout << "Invalid choice, please try again." << endl;
+            break;
+        }
 
 
-    // ---------- INPUT ----------
-    cout << "Enter matrix A:\n";
-    cin >> A;
-
-    cout << "Enter matrix B:\n";
-    cin >> B;
-
-    cout << "Enter matrix C:\n";
-    cin >> C;
-
-
-    // ---------- COMPLEX EXPRESSION (5+ operations) ----------
-    MatrixShort R = (A + B - C) * 2 % 5 | 3;
-
-
-    cout << "\nResult R = (A + B - C) * 2 % 5 | 3:\n";
-    cout << R;
-
-
-    // ---------- UNARY OPERATORS ----------
-    ++A;
-    cout << "\nAfter ++A:\n" << A;
-
-    --B;
-    cout << "\nAfter --B:\n" << B;
-
-    MatrixShort D = -C;
-    cout << "\nUnary minus C:\n" << D;
-
-    MatrixShort E = ~C;
-    cout << "\nBitwise NOT C:\n" << E;
-
-
-    // ---------- INDEX ----------
-    cout << "\nA[0][0] = " << A[0][0] << endl;
-
-
-    // ---------- COMPARISON ----------
-    if (A > B)
-        cout << "A > B\n";
-    else
-        cout << "A <= B\n";
-
-
-    // ---------- BITWISE TEST ----------
-    MatrixShort F = A;
-    F <<= 1;
-    cout << "\nA <<= 1:\n" << F;
-
-    F >>= 1;
-    cout << "\nA >>= 1:\n" << F;
-
-
-    // ---------- ASSIGNMENT OPS ----------
-    A += B;
-    cout << "\nA += B:\n" << A;
-
-    A -= B;
-    cout << "\nA -= B:\n" << A;
-
-    A *= 2;
-    cout << "\nA *= 2:\n" << A;
-
-    A /= 2;
-    cout << "\nA /= 2:\n" << A;
-
-    A %= 3;
-    cout << "\nA %= 3:\n" << A;
-
-
-    // ---------- OBJECT COUNT ----------
-    cout << "\nMatrix objects count: " << MatrixShort::getCount() << endl;
+    } while (ch != 0);
 }

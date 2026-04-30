@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Vector3F.cpp">
+    <ClCompile Include="Task1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="Task2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Task3.cpp">
