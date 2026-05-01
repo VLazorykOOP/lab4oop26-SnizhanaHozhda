@@ -17,8 +17,18 @@ public:
     string surname;
     string name;
     string patronymic;
-
-
+  int *p; 
+  //  Person() : patronymic(""){ surname ="nosurname"; name ="" ; p  = new int[10];  }
+ 
+/*  Person( const Person& s )
+   { 
+ if (this!=&s)
+  {
+       
+   }
+ */  
+   
+   }
     friend istream& operator>>(istream& in, Person& p)
     {
         in >> p.surname >> p.name >> p.patronymic;
